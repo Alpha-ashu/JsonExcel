@@ -1,0 +1,19 @@
+{
+  "userId" : 6,
+  "fullName" : "Sarah Johnson",
+  "dob" : "1995-09-10",
+  "contact" : {
+    "primaryEmail" : "sarah.johnson@example.com",
+    "mobile" : "+6574839201"
+  },
+  "location" : {
+    "city" : "Philadelphia",
+    "state" : "PA",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : false,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}

@@ -1,0 +1,19 @@
+{
+  "userId" : 10,
+  "fullName" : "Anna White",
+  "dob" : "2001-08-25",
+  "contact" : {
+    "primaryEmail" : "anna.white@example.com",
+    "mobile" : "+9485739202"
+  },
+  "location" : {
+    "city" : "San Francisco",
+    "state" : "CA",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : false
+  },
+  "status" : "Inactive"
+}

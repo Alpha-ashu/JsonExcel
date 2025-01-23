@@ -1,0 +1,19 @@
+{
+  "userId" : 7,
+  "fullName" : "Chris Lee",
+  "dob" : "1978-03-22",
+  "contact" : {
+    "primaryEmail" : "chris.lee@example.com",
+    "mobile" : "+7483920102"
+  },
+  "location" : {
+    "city" : "San Diego",
+    "state" : "CA",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : false
+  },
+  "status" : "Inactive"
+}

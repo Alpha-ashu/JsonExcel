@@ -1,0 +1,19 @@
+{
+  "userId" : 3,
+  "fullName" : "Sam Wilson",
+  "dob" : "1983-01-20",
+  "contact" : {
+    "primaryEmail" : "sam.wilson@example.com",
+    "mobile" : "+1928374655"
+  },
+  "location" : {
+    "city" : "Chicago",
+    "state" : "IL",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}

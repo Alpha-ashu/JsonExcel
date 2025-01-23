@@ -1,0 +1,19 @@
+{
+  "userId" : 2,
+  "fullName" : "Jane Smith",
+  "dob" : "1998-07-08",
+  "contact" : {
+    "primaryEmail" : "jane.smith@example.com",
+    "mobile" : "+9876543210"
+  },
+  "location" : {
+    "city" : "Los Angeles",
+    "state" : "CA",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : false
+  },
+  "status" : "Inactive"
+}

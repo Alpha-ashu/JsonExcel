@@ -1,0 +1,14 @@
+{
+  "id" : 6,
+  "name" : "Sarah Johnson",
+  "age" : 28,
+  "email" : "sarah.johnson@example.com",
+  "address" : {
+    "street" : "303 Birch St",
+    "city" : "Philadelphia",
+    "state" : "PA",
+    "zip" : "19101"
+  },
+  "preferences" : [ "push" ],
+  "isActive" : true
+}

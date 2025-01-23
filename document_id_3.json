@@ -1,0 +1,14 @@
+{
+  "id" : 3,
+  "name" : "Sam Wilson",
+  "age" : 40,
+  "email" : "sam.wilson@example.com",
+  "address" : {
+    "street" : "789 Pine St",
+    "city" : "Chicago",
+    "state" : "IL",
+    "zip" : "60601"
+  },
+  "preferences" : [ "push", "email" ],
+  "isActive" : true
+}

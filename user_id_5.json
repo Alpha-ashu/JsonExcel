@@ -1,0 +1,19 @@
+{
+  "userId" : 5,
+  "fullName" : "Michael Brown",
+  "dob" : "1973-05-30",
+  "contact" : {
+    "primaryEmail" : "michael.brown@example.com",
+    "mobile" : "+5647382910"
+  },
+  "location" : {
+    "city" : "Phoenix",
+    "state" : "AZ",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : true
+  },
+  "status" : "Inactive"
+}

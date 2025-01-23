@@ -1,0 +1,14 @@
+{
+  "id" : 2,
+  "name" : "Jane Smith",
+  "age" : 25,
+  "email" : "jane.smith@example.com",
+  "address" : {
+    "street" : "456 Oak St",
+    "city" : "Los Angeles",
+    "state" : "CA",
+    "zip" : "90001"
+  },
+  "preferences" : [ "email" ],
+  "isActive" : false
+}

@@ -1,0 +1,19 @@
+{
+  "userId" : 8,
+  "fullName" : "Patricia Lopez",
+  "dob" : "1990-06-18",
+  "contact" : {
+    "primaryEmail" : "patricia.lopez@example.com",
+    "mobile" : "+8392014057"
+  },
+  "location" : {
+    "city" : "Dallas",
+    "state" : "TX",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}

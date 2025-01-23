@@ -1,0 +1,14 @@
+{
+  "id" : 5,
+  "name" : "Michael Brown",
+  "age" : 50,
+  "email" : "michael.brown@example.com",
+  "address" : {
+    "street" : "202 Elm St",
+    "city" : "Phoenix",
+    "state" : "AZ",
+    "zip" : "85001"
+  },
+  "preferences" : [ "email", "sms", "push" ],
+  "isActive" : false
+}

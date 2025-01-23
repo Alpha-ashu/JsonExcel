@@ -1,0 +1,14 @@
+{
+  "id" : 10,
+  "name" : "Anna White",
+  "age" : 22,
+  "email" : "anna.white@example.com",
+  "address" : {
+    "street" : "707 Willow St",
+    "city" : "San Francisco",
+    "state" : "CA",
+    "zip" : "94101"
+  },
+  "preferences" : [ "email" ],
+  "isActive" : false
+}

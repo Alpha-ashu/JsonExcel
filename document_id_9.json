@@ -1,0 +1,14 @@
+{
+  "id" : 9,
+  "name" : "James Green",
+  "age" : 38,
+  "email" : "james.green@example.com",
+  "address" : {
+    "street" : "606 Redwood St",
+    "city" : "Austin",
+    "state" : "TX",
+    "zip" : "73301"
+  },
+  "preferences" : [ "sms", "push" ],
+  "isActive" : true
+}

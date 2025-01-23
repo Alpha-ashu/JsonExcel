@@ -1,0 +1,14 @@
+{
+  "id" : 7,
+  "name" : "Chris Lee",
+  "age" : 45,
+  "email" : "chris.lee@example.com",
+  "address" : {
+    "street" : "404 Cedar St",
+    "city" : "San Diego",
+    "state" : "CA",
+    "zip" : "92101"
+  },
+  "preferences" : [ "email" ],
+  "isActive" : false
+}

@@ -1,0 +1,19 @@
+{
+  "userId" : 9,
+  "fullName" : "James Green",
+  "dob" : "1985-12-05",
+  "contact" : {
+    "primaryEmail" : "james.green@example.com",
+    "mobile" : "+9485739201"
+  },
+  "location" : {
+    "city" : "Austin",
+    "state" : "TX",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : false,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}

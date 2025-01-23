@@ -1,0 +1,14 @@
+{
+  "id" : 4,
+  "name" : "Emily Davis",
+  "age" : 35,
+  "email" : "emily.davis@example.com",
+  "address" : {
+    "street" : "101 Maple St",
+    "city" : "Houston",
+    "state" : "TX",
+    "zip" : "77001"
+  },
+  "preferences" : [ "sms" ],
+  "isActive" : true
+}

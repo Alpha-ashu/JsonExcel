@@ -1,0 +1,14 @@
+{
+  "id" : 8,
+  "name" : "Patricia Lopez",
+  "age" : 32,
+  "email" : "patricia.lopez@example.com",
+  "address" : {
+    "street" : "505 Spruce St",
+    "city" : "Dallas",
+    "state" : "TX",
+    "zip" : "75201"
+  },
+  "preferences" : [ "sms", "email" ],
+  "isActive" : true
+}

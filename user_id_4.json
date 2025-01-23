@@ -1,0 +1,19 @@
+{
+  "userId" : 4,
+  "fullName" : "Emily Davis",
+  "dob" : "1988-11-15",
+  "contact" : {
+    "primaryEmail" : "emily.davis@example.com",
+    "mobile" : "+1029384756"
+  },
+  "location" : {
+    "city" : "Houston",
+    "state" : "TX",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : false,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}

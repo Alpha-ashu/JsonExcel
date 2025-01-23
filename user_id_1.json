@@ -1,0 +1,19 @@
+{
+  "userId" : 1,
+  "fullName" : "John Doe",
+  "dob" : "1993-04-12",
+  "contact" : {
+    "primaryEmail" : "john.doe@example.com",
+    "mobile" : "+1234567890"
+  },
+  "location" : {
+    "city" : "New York",
+    "state" : "NY",
+    "country" : "USA"
+  },
+  "preferences" : {
+    "receiveEmails" : true,
+    "receiveSms" : true
+  },
+  "status" : "Active"
+}
