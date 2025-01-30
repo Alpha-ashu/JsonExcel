@@ -1,0 +1,109 @@
+package JSON;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Process1_FindMatchedRecordFromLegacyResponse {
+
+    private static final Logger logger = LoggerFactory.getLogger(Process1_FindMatchedRecordFromLegacyResponse.class);
+    private static final String BASE_DIRECTORY = "target/JSON_response/";
+    private static final String LEGACY_FOLDER = BASE_DIRECTORY + "LegacyResponses/";
+    private static final String PAYER_FOLDER = BASE_DIRECTORY + "PayerPackageResponses/";
+    private static final String EXTRACTED_FOLDER = BASE_DIRECTORY + "ExtractedRecords/";
+    private static final String MAPPING_FILE = "Data/mapping.xlsx";
+
+    public static void main(String[] args) {
+        try {
+            Map<String, String> mapping = readMapping(MAPPING_FILE);
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            List<File> legacyFiles = getLatestFiles(LEGACY_FOLDER);
+            List<File> payerFiles = getLatestFiles(PAYER_FOLDER);
+
+            for (File legacyFile : legacyFiles) {
+                JsonNode legacyJson = objectMapper.readTree(legacyFile);
+                for (File payerFile : payerFiles) {
+                    JsonNode payerJson = objectMapper.readTree(payerFile);
+                    processFiles(objectMapper, legacyJson, payerJson, mapping);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error in processing JSON files", e);
+        }
+    }
+
+    private static List<File> getLatestFiles(String folderPath) {
+        File folder = new File(folderPath);
+        if (!folder.exists() || !folder.isDirectory()) return Collections.emptyList();
+
+        return Arrays.stream(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".json"))))
+                .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                .collect(Collectors.toList());
+    }
+
+    private static Map<String, String> readMapping(String filePath) throws IOException {
+        Map<String, String> mapping = new HashMap<>();
+        // Read the Excel file and store mappings (same logic as before)
+        return mapping;
+    }
+
+    private static void processFiles(ObjectMapper objectMapper, JsonNode legacyJson, JsonNode payerJson, Map<String, String> mapping) {
+        JsonNode legacyClaims = legacyJson.at("/searchResult/searchOutput/claims");
+        JsonNode payerClaims = payerJson.at("/data");
+
+        if (!legacyClaims.isArray() || !payerClaims.isArray()) {
+            logger.error("Expected both responses to contain arrays");
+            return;
+        }
+
+        for (JsonNode legacyRecord : legacyClaims) {
+            for (JsonNode payerRecord : payerClaims) {
+                Status status = compareUsingMapping(legacyRecord, payerRecord, mapping);
+                if ("MATCHED".equals(status.StatusCode)) {
+                    saveMatchedRecords(objectMapper, legacyRecord, payerRecord, status.Payer);
+                }
+            }
+        }
+    }
+
+    private static Status compareUsingMapping(JsonNode legacy, JsonNode payer, Map<String, String> mapping) {
+        Status status = new Status();
+        int matchedCount = 0;
+        for (Map.Entry<String, String> entry : mapping.entrySet()) {
+            String legacyValue = legacy.at(entry.getKey()).asText(null);
+            String newValue = payer.at(entry.getValue()).asText(null);
+            if (legacyValue != null && legacyValue.equals(newValue)) matchedCount++;
+        }
+        status.StatusCode = (matchedCount == mapping.size()) ? "MATCHED" : "PARTIAL_MATCH";
+        return status;
+    }
+
+    private static void saveMatchedRecords(ObjectMapper objectMapper, JsonNode legacy, JsonNode payer, String payerId) {
+        String directoryPath = EXTRACTED_FOLDER + payerId;
+        new File(directoryPath).mkdirs();
+        saveJsonFile(directoryPath + "/Legacy_" + payerId + ".json", wrapJson(objectMapper, "searchResult/searchOutput/claims", legacy));
+        saveJsonFile(directoryPath + "/Payer_" + payerId + ".json", wrapJson(objectMapper, "data", payer));
+    }
+
+    private static ObjectNode wrapJson(ObjectMapper objectMapper, String path, JsonNode data) {
+        ObjectNode rootNode = objectMapper.createObjectNode();
+        rootNode.set(path.split("/")[0], objectMapper.createObjectNode().set(path.split("/")[1], objectMapper.createArrayNode().add(data)));
+        return rootNode;
+    }
+
+    private static void saveJsonFile(String filePath, JsonNode content) {
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(fileWriter, content);
+        } catch (IOException e) {
+            logger.error("Failed to write file {}", filePath, e);
+        }
+    }
+}
