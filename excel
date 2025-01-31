@@ -1,0 +1,107 @@
+import os
+import json
+import pandas as pd
+from jsonpointer import resolve_pointer
+
+def extract_numeric(value):
+    """Extracts the numeric portion from a string."""
+    return ''.join(filter(str.isdigit, str(value)))
+
+def extract_and_save_records(mapping_file, response1_path, response2_path, output_dir):
+    """Extracts relevant JSON records and saves them as JSON files."""
+    df_mapping = pd.read_excel(mapping_file, sheet_name=0)
+    
+    with open(response1_path, 'r', encoding='utf-8') as f:
+        response1_json = json.load(f)
+    with open(response2_path, 'r', encoding='utf-8') as f:
+        response2_json = json.load(f)
+    
+    for index, row in df_mapping.iterrows():
+        payer_pointer = row['payerjsonpointerpath']
+        
+        try:
+            extracted_value = resolve_pointer(response2_json, payer_pointer, None)
+            numeric_value = extract_numeric(extracted_value)
+            
+            if numeric_value:
+                response1_record = search_value_in_json(response1_json, numeric_value)
+                response2_record = search_value_in_json(response2_json, numeric_value)
+                
+                if response1_record and response2_record:
+                    save_json(output_dir, f"response1_{numeric_value}.json", response1_record)
+                    save_json(output_dir, f"response2_{numeric_value}.json", response2_record)
+        except Exception as e:
+            print(f"Error processing row {index}: {e}")
+
+def search_value_in_json(json_data, search_value):
+    """Searches for a numeric value in a JSON structure."""
+    if isinstance(json_data, dict):
+        for key, value in json_data.items():
+            if isinstance(value, (dict, list)):
+                result = search_value_in_json(value, search_value)
+                if result:
+                    return result
+            elif extract_numeric(value) == search_value:
+                return json_data
+    elif isinstance(json_data, list):
+        for item in json_data:
+            result = search_value_in_json(item, search_value)
+            if result:
+                return result
+    return None
+
+def save_json(output_dir, filename, data):
+    """Saves JSON data to a file."""
+    os.makedirs(output_dir, exist_ok=True)
+    with open(os.path.join(output_dir, filename), 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
+def compare_json_data(mapping_file, extracted_dir, output_excel):
+    """Compares JSON records based on mapping and logs results in an Excel file."""
+    df_mapping = pd.read_excel(mapping_file, sheet_name=1)
+    comparison_results = []
+    
+    for file in os.listdir(extracted_dir):
+        if file.startswith("response1_") and file.endswith(".json"):
+            numeric_value = file.split("_")[1].split(".")[0]
+            response1_file = os.path.join(extracted_dir, f"response1_{numeric_value}.json")
+            response2_file = os.path.join(extracted_dir, f"response2_{numeric_value}.json")
+            
+            if os.path.exists(response1_file) and os.path.exists(response2_file):
+                with open(response1_file, 'r', encoding='utf-8') as f1, open(response2_file, 'r', encoding='utf-8') as f2:
+                    response1_json = json.load(f1)
+                    response2_json = json.load(f2)
+                    
+                for _, row in df_mapping.iterrows():
+                    legacy_path = row['legacyjsonpointerpath']
+                    payer_path = row['payerjsonpointerpath']
+                    
+                    legacy_value = resolve_pointer(response1_json, legacy_path, None)
+                    payer_value = resolve_pointer(response2_json, payer_path, None)
+                    
+                    status = compare_values(legacy_value, payer_value)
+                    comparison_results.append([numeric_value, legacy_path, payer_path, legacy_value, payer_value, status])
+    
+    df_output = pd.DataFrame(comparison_results, columns=[
+        "ClaimsRecord", "legacyjsonpointerpath", "payerjsonpointerpath", "legacyvalue", "payervalue", "validation"
+    ])
+    df_output.to_excel(output_excel, index=False)
+    print(f"Comparison results saved to {output_excel}")
+
+def compare_values(value1, value2):
+    """Compares two values and returns the validation status."""
+    if value1 == value2:
+        return "match"
+    elif value1 and value2 and (str(value1).lower() in str(value2).lower() or str(value2).lower() in str(value1).lower()):
+        return "partially matched"
+    return "not matched"
+
+if __name__ == "__main__":
+    mapping_file = "mapping.xlsx"
+    response1_path = "response1.json"
+    response2_path = "response2.json"
+    extracted_dir = "target/extractedRecord"
+    output_excel = "comparison_results.xlsx"
+    
+    extract_and_save_records(mapping_file, response1_path, response2_path, extracted_dir)
+    compare_json_data(mapping_file, extracted_dir, output_excel)
