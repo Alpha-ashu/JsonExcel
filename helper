@@ -1,0 +1,21 @@
+package helpers;
+
+import org.python.util.PythonInterpreter;
+import java.util.Properties;
+
+public class JythonExecutor {
+
+    public static void runJythonScript(String scriptPath, String mappingFile, String legacyFile, String payerFile) {
+        Properties props = new Properties();
+        props.setProperty("python.import.site", "false");
+        PythonInterpreter.initialize(System.getProperties(), props, new String[0]);
+
+        try (PythonInterpreter pyInterp = new PythonInterpreter()) {
+            pyInterp.execfile(scriptPath);
+            pyInterp.exec("process_json_files('" + mappingFile + "', '" + legacyFile + "', '" + payerFile + "')");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error executing Jython script");
+        }
+    }
+}
