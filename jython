@@ -1,0 +1,87 @@
+from org.apache.poi.xssf.usermodel import XSSFWorkbook
+from org.json import JSONObject, JSONArray
+from java.io import File, FileWriter
+
+def read_mapping(file_path):
+    workbook = XSSFWorkbook(File(file_path))
+    sheet = workbook.getSheetAt(0)
+    mapping = {}
+
+    for row in range(1, sheet.getPhysicalNumberOfRows()):
+        key = sheet.getRow(row).getCell(0).getStringCellValue()
+        value = sheet.getRow(row).getCell(1).getStringCellValue()
+        mapping[key] = value
+    return mapping
+
+def find_node_value(json_node, keys, level=0):
+    """ Recursively finds the value of a nested JSON key """
+    if level >= len(keys):
+        return json_node if isinstance(json_node, unicode) else None
+    
+    key = keys[level]
+    if json_node.has(key):
+        return find_node_value(json_node.get(key), keys, level + 1)
+    return None
+
+def compare_json_records(legacy_record, payer_record, mapping):
+    """ Compares JSON records based on the mapping file """
+    status = {"MatchedFields": 0, "TotalFields": len(mapping), "Status": "", "Payer": None}
+    
+    for old_path in mapping.keys():
+        new_path = mapping[old_path]
+        old_value = find_node_value(legacy_record, old_path.split("/"))
+        new_value = find_node_value(payer_record, new_path.split("/"))
+        
+        if old_value and old_value == new_value:
+            status["MatchedFields"] += 1
+            if new_path == "claimIdentifiers/patientAccountNumber":
+                status["Payer"] = old_value
+    
+    status["Status"] = "MATCHED" if status["MatchedFields"] == status["TotalFields"] else f"PARTIAL_MATCH ({status['MatchedFields']}/{status['TotalFields']})"
+    return status
+
+def save_matched_json(payer_id, file_name, json_content):
+    """ Saves JSON files for matched records """
+    base_directory = "target/filteredRecord/" + payer_id + "/"
+    directory = File(base_directory)
+    if not directory.exists():
+        directory.mkdirs()
+    
+    file_path = File(base_directory + file_name)
+    writer = FileWriter(file_path)
+    writer.write(json_content.toString(4))
+    writer.close()
+
+def process_json_files(mapping_file, legacy_file, payer_file):
+    """ Main function to process JSON files and find matched records """
+    mapping = read_mapping(mapping_file)
+    
+    legacy_data = JSONObject(File(legacy_file).readText("UTF-8"))
+    payer_data = JSONObject(File(payer_file).readText("UTF-8"))
+    
+    legacy_records = legacy_data.getJSONObject("searchResult").getJSONObject("searchOutput").getJSONArray("claims")
+    payer_records = payer_data.getJSONArray("data")
+    
+    for i in range(legacy_records.length()):
+        legacy_record = legacy_records.getJSONObject(i)
+        for j in range(payer_records.length()):
+            payer_record = payer_records.getJSONObject(j)
+            status = compare_json_records(legacy_record, payer_record, mapping)
+            
+            if status["Status"] == "MATCHED":
+                final_response1 = JSONObject()
+                final_response1.put("searchResult", JSONObject().put("searchOutput", JSONObject().put("claims", JSONArray().put(legacy_record))))
+                
+                final_response2 = JSONObject()
+                final_response2.put("data", JSONArray().put(payer_record))
+                
+                payer_id = status["Payer"] if status["Payer"] else "Unknown"
+                save_matched_json(payer_id, "Legacy_" + payer_id + ".json", final_response1)
+                save_matched_json(payer_id, "Payer_" + payer_id + ".json", final_response2)
+
+if __name__ == "__main__":
+    mapping_file_path = "src/data/mappingForFilteringFiles.xlsx"
+    legacy_file_path = "src/data/response1.json"
+    payer_file_path = "src/data/response2.json"
+    
+    process_json_files(mapping_file_path, legacy_file_path, payer_file_path)
