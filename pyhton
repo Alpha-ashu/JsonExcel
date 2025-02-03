@@ -1,0 +1,63 @@
+import os
+import json
+import pandas as pd
+from openpyxl import Workbook
+
+
+def read_mapping(file_path):
+    df = pd.read_excel(file_path, sheet_name=None)
+    unique_identifiers = dict(zip(df['Sheet1'].iloc[:, 0], df['Sheet1'].iloc[:, 1]))
+    comparison_mappings = dict(zip(df['Sheet2'].iloc[:, 0], df['Sheet2'].iloc[:, 1]))
+    return unique_identifiers, comparison_mappings
+
+
+def load_json(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+def generate_report(output_path, results):
+    wb = Workbook()
+    summary_ws = wb.active
+    summary_ws.title = "Summary"
+    summary_ws.append(["Claim Folder", "Matched Records"])
+    
+    for claim_folder, data in results.items():
+        summary_ws.append([claim_folder, len(data)])
+        ws = wb.create_sheet(title=claim_folder)
+        ws.append(["Legacy Path", "Payer Path", "Legacy Value", "Payer Value", "Match Status"])
+        for record in data:
+            ws.append(record)
+    
+    wb.save(output_path)
+
+
+def process_claims(target_folder, mapping_file, output_excel):
+    unique_ids, mappings = read_mapping(mapping_file)
+    results = {}
+    
+    for claim_folder in os.listdir(target_folder):
+        claim_path = os.path.join(target_folder, claim_folder)
+        legacy_file = os.path.join(claim_path, "Legacy.json")
+        payer_file = os.path.join(claim_path, "Payer.json")
+        
+        if os.path.exists(legacy_file) and os.path.exists(payer_file):
+            legacy_json = load_json(legacy_file)
+            payer_json = load_json(payer_file)
+            results[claim_folder] = compare_json(legacy_json, payer_json, mappings)
+    
+    generate_report(output_excel, results)
+
+
+def compare_json(legacy_json, payer_json, mappings):
+    records = []
+    for old_path, new_path in mappings.items():
+        legacy_value = extract_value(legacy_json, old_path.split('/'))
+        payer_value = extract_value(payer_json, new_path.split('/'))
+        match_status = "Matched" if legacy_value == payer_value else "Not Matched"
+        records.append([old_path, new_path, legacy_value, payer_value, match_status])
+    return records
+
+
+if __name__ == "__main__":
+    process_claims("target/responses", "Data/mapping.xlsx", "Data/output.xlsx")
